@@ -1,0 +1,67 @@
+⿡ Customers Table
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Email VARCHAR(50) UNIQUE NOT NULL,
+    Age INT CHECK (Age >= 0),             -- Age must be non-negative
+    Gender VARCHAR(10) CHECK (Gender IN ('Male','Female','Other')), -- Only valid genders
+    JoinDate DATE DEFAULT CURRENT_DATE,   -- Defaults to today if not provided
+    INDEX idx_name (Name)
+);
+Added Constraints:
+NOT NULL → ensures essential fields are always filled
+CHECK → enforces valid Age & Gender
+DEFAULT → JoinDate auto-set
+⿢ Products Table
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Category VARCHAR(50) NOT NULL,
+    Price INT NOT NULL CHECK (Price >= 0),
+    StockQty INT NOT NULL CHECK (StockQty >= 0),
+    INDEX idx_category (Category)
+);
+Constraints:
+Price & StockQty cannot be negative
+Essential fields cannot be NULL
+⿣ Orders Table
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerID INT NOT NULL,
+    OrderDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    TotalAmount INT NOT NULL CHECK (TotalAmount >= 0),
+    Status VARCHAR(20) NOT NULL CHECK (Status IN ('Pending','Completed','Cancelled')),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    INDEX idx_orderdate (OrderDate)
+);
+Constraints:
+Valid order Status
+TotalAmount non-negative
+⿤ OrderItems Table
+CREATE TABLE OrderItems (
+    OrderItemID INT PRIMARY KEY,
+    OrderID INT NOT NULL,
+    ProductID INT NOT NULL,
+    Quantity INT NOT NULL CHECK (Quantity > 0),
+    Price INT NOT NULL CHECK (Price >= 0),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    INDEX idx_order_product (OrderID, ProductID)
+);
+Constraints:
+Quantity > 0, Price ≥ 0
+Mandatory foreign keys
+⿥ Payments Table
+CREATE TABLE Payments (
+    PaymentID INT PRIMARY KEY,
+    OrderID INT NOT NULL,
+    PaymentDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Amount INT NOT NULL CHECK (Amount >= 0),
+    PaymentMethod VARCHAR(20) NOT NULL CHECK (PaymentMethod IN ('Card','UPI','Cash','NetBanking')),
+    Status VARCHAR(20) NOT NULL CHECK (Status IN ('Success','Failed','Pending')),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    INDEX idx_paymentdate (PaymentDate)
+);
+Constraints:
+Valid payment methods & statuses
+Amount cannot be negative
